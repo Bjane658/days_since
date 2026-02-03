@@ -149,6 +149,58 @@ def reset_task(task_id):
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/tasks/<task_id>', methods=['GET'])
+def get_task(task_id):
+    """API endpoint to get a single task"""
+    try:
+        task = get_task_by_id(task_id)
+        if not task:
+            return jsonify({'error': 'Task not found'}), 404
+        return jsonify(task), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/tasks/<task_id>', methods=['PATCH'])
+def update_task(task_id):
+    """API endpoint to update a task's date"""
+    try:
+        filepath = os.path.join(DATA_DIR, f"{task_id}.json")
+
+        if not os.path.exists(filepath):
+            return jsonify({'error': 'Task not found'}), 404
+
+        with open(filepath, 'r') as f:
+            task = json.load(f)
+
+        data = request.get_json()
+        new_date = data.get('lastReset')
+
+        if not new_date:
+            return jsonify({'error': 'lastReset date is required'}), 400
+
+        # Validate date format
+        try:
+            datetime.strptime(new_date, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
+
+        # Update lastReset
+        task['lastReset'] = new_date
+
+        # Add to history if not already there
+        if new_date not in task.get('history', []):
+            task['history'].append(new_date)
+
+        with open(filepath, 'w') as f:
+            json.dump(task, f, indent=2)
+
+        return jsonify(task), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/tasks/<task_id>', methods=['DELETE'])
 def delete_task(task_id):
     """API endpoint to delete a task"""

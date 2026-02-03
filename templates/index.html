@@ -181,6 +181,97 @@
         .task-tile.overdue .days-since {
             color: #ef4444;
         }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 24px;
+        }
+
+        .modal-body {
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
     </style>
 </head>
 <body>
@@ -223,6 +314,27 @@
                     <p>Add your first task above to start tracking.</p>
                 </div>
             {% endif %}
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div id="editTaskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Edit Task</div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="editTaskName">Task Name</label>
+                    <input type="text" id="editTaskName" class="form-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="editTaskDate">Last Completed Date</label>
+                    <input type="date" id="editTaskDate" class="form-input">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTaskDate()">Save</button>
+            </div>
         </div>
     </div>
 
@@ -301,7 +413,65 @@
             }
         }
 
-        // Optional: Make the entire tile clickable to reset
+        let currentEditingTaskId = null;
+
+        async function openEditModal(taskId) {
+            try {
+                const response = await fetch(`/api/tasks/${taskId}`);
+                if (!response.ok) {
+                    alert('Failed to load task');
+                    return;
+                }
+
+                const task = await response.json();
+                currentEditingTaskId = taskId;
+
+                document.getElementById('editTaskName').value = task.name;
+                document.getElementById('editTaskDate').value = task.lastReset;
+                document.getElementById('editTaskModal').classList.add('show');
+            } catch (error) {
+                console.error('Error loading task:', error);
+                alert('Failed to load task');
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editTaskModal').classList.remove('show');
+            currentEditingTaskId = null;
+        }
+
+        async function saveTaskDate() {
+            if (!currentEditingTaskId) return;
+
+            const newDate = document.getElementById('editTaskDate').value;
+            if (!newDate) {
+                alert('Please select a date');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/tasks/${currentEditingTaskId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ lastReset: newDate })
+                });
+
+                if (response.ok) {
+                    closeEditModal();
+                    window.location.reload();
+                } else {
+                    const error = await response.json();
+                    alert(error.error || 'Failed to update task');
+                }
+            } catch (error) {
+                console.error('Error updating task:', error);
+                alert('Failed to update task');
+            }
+        }
+
+        // Make the entire tile clickable to open edit modal
         document.addEventListener('DOMContentLoaded', function() {
             const tiles = document.querySelectorAll('.task-tile');
             tiles.forEach(tile => {
@@ -310,9 +480,16 @@
                     if (event.target === tile || event.target.classList.contains('task-name') ||
                         event.target.classList.contains('days-since') || event.target.classList.contains('days-label')) {
                         const taskId = tile.dataset.taskId;
-                        resetTask(taskId, event);
+                        openEditModal(taskId);
                     }
                 });
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('editTaskModal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeEditModal();
+                }
             });
         });
     </script>
