@@ -42,7 +42,13 @@ def get_all_tasks():
                     days_since = (date.today() - last_reset_date).days
                     task_data['daysSince'] = days_since
                 else:
+                    days_since = 0
                     task_data['daysSince'] = 0
+
+                # Calculate days until due based on cycle
+                cycle = task_data.get('cycle')
+                if last_reset and cycle:
+                    task_data['daysUntilDue'] = cycle - days_since
 
                 tasks.append(task_data)
         except Exception as e:
@@ -90,9 +96,14 @@ def create_task():
     try:
         data = request.get_json()
         name = data.get('name')
+        cycle = data.get('cycle')
 
         if not name:
             return jsonify({'error': 'Name is required'}), 400
+
+        if cycle is not None:
+            if not isinstance(cycle, int) or isinstance(cycle, bool) or cycle < 1:
+                return jsonify({'error': 'Cycle must be a whole number of days (>= 1)'}), 400
 
         # Generate ID from name
         task_id = name.lower().replace(' ', '_')
@@ -112,6 +123,8 @@ def create_task():
             'lastReset': today,
             'history': [today]
         }
+        if cycle is not None:
+            task['cycle'] = cycle
 
         ensure_data_dir()
         with open(filepath, 'w') as f:
@@ -175,6 +188,8 @@ def update_task(task_id):
 
         data = request.get_json()
         new_date = data.get('lastReset')
+        new_cycle = data.get('cycle', None)
+        has_cycle = 'cycle' in data
 
         if not new_date:
             return jsonify({'error': 'lastReset date is required'}), 400
@@ -184,6 +199,15 @@ def update_task(task_id):
             datetime.strptime(new_date, '%Y-%m-%d')
         except ValueError:
             return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
+
+        # Update cycle if provided (null removes it)
+        if has_cycle:
+            if new_cycle is None:
+                task.pop('cycle', None)
+            elif isinstance(new_cycle, int) and not isinstance(new_cycle, bool) and new_cycle >= 1:
+                task['cycle'] = new_cycle
+            else:
+                return jsonify({'error': 'Cycle must be a whole number of days (>= 1)'}), 400
 
         # Update lastReset
         task['lastReset'] = new_date

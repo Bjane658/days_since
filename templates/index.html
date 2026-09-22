@@ -128,9 +128,43 @@
             margin-bottom: 16px;
         }
 
+        .cycle-badge {
+            display: inline-block;
+            font-size: 0.65em;
+            font-weight: 600;
+            color: #667eea;
+            background: #eef0fe;
+            border-radius: 10px;
+            padding: 2px 8px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .due-label {
+            font-size: 0.95em;
+            color: #555;
+            margin-bottom: 16px;
+        }
+
+        .due-label.due-today {
+            font-weight: 600;
+            color: #ef4444;
+        }
+
+
         .task-actions {
             display: flex;
             gap: 8px;
+        }
+
+        .cycle-input {
+            flex: 0 0 140px;
+        }
+
+        .form-hint {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 6px;
         }
 
         .btn-reset {
@@ -290,18 +324,39 @@
                     placeholder="What do you want to track? (e.g., Vacuumed the floor, Cleaned the kitchen)"
                     required
                 >
+                <input
+                    type="number"
+                    class="add-task-input cycle-input"
+                    id="taskCycleInput"
+                    placeholder="Every __ days"
+                    min="1"
+                    step="1"
+                >
                 <button type="submit" class="btn btn-primary">Add Task</button>
             </form>
-        </div>
 
         <div id="tasksContainer" class="tasks-grid">
             {% if tasks %}
                 {% for task in tasks %}
-                <div class="task-tile {% if task.daysSince <= 2 %}fresh{% elif task.daysSince <= 7 %}warning{% else %}overdue{% endif %}"
+                <div class="task-tile {% if task.cycle and task.daysSince < task.cycle %}fresh{% elif task.cycle and task.daysSince <= task.cycle + 1 %}warning{% elif task.cycle %}overdue{% elif task.daysSince <= 2 %}fresh{% elif task.daysSince <= 7 %}warning{% else %}overdue{% endif %}"
                      data-task-id="{{ task.id }}">
-                    <div class="task-name">{{ task.name }}</div>
+                    <div class="task-name">{{ task.name }}
+                        {% if task.cycle %}<span class="cycle-badge" title="Every {{ task.cycle }} days">{{ task.cycle }}d</span>{% endif %}
+                    </div>
                     <div class="days-since">{{ task.daysSince }}</div>
                     <div class="days-label">day{% if task.daysSince != 1 %}s{% endif %} ago</div>
+                    {% if task.cycle %}
+                        {% set due = task.cycle - task.daysSince %}
+                        {% if due > 1 %}
+                            <div class="due-label">due in {{ due }} days</div>
+                        {% elif due == 1 %}
+                            <div class="due-label">due tomorrow</div>
+                        {% elif due == 0 %}
+                            <div class="due-label due-today">due today</div>
+                        {% else %}
+                            <div class="due-label due-today">{{ -due }} day{% if due != -1 %}s{% endif %} overdue</div>
+                        {% endif %}
+                    {% endif %}
                     <div class="task-actions">
                         <button class="btn btn-reset" onclick="resetTask('{{ task.id }}', event)">Done Today!</button>
                         <button class="btn btn-delete" onclick="deleteTask('{{ task.id }}', event)">×</button>
@@ -329,6 +384,10 @@
                 <div class="form-group">
                     <label class="form-label" for="editTaskDate">Last Completed Date</label>
                     <input type="date" id="editTaskDate" class="form-input">
+                <div class="form-group">
+                    <label class="form-label" for="editTaskCycle">Cycle (days)</label>
+                    <input type="number" id="editTaskCycle" class="form-input" placeholder="no cycle" min="1" step="1">
+                    <div class="form-hint">How often the task should be done. Leave empty for no cycle.</div>
                 </div>
             </div>
             <div class="modal-actions">
@@ -344,8 +403,15 @@
 
             const input = document.getElementById('taskNameInput');
             const name = input.value.trim();
+            const cycleInput = document.getElementById('taskCycleInput');
+            const cycleValue = cycleInput.value.trim();
+            const cycle = cycleValue ? parseInt(cycleValue, 10) : null;
 
             if (!name) return;
+            if (cycleValue && (!Number.isInteger(cycle) || cycle < 1)) {
+                alert('Cycle must be a whole number of days (>= 1)');
+                return;
+            }
 
             try {
                 const response = await fetch('/api/tasks', {
@@ -353,11 +419,12 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name })
+                    body: JSON.stringify(cycle ? { name, cycle } : { name })
                 });
 
                 if (response.ok) {
                     input.value = '';
+                    cycleInput.value = '';
                     window.location.reload();
                 } else {
                     const error = await response.json();
@@ -428,6 +495,7 @@
 
                 document.getElementById('editTaskName').value = task.name;
                 document.getElementById('editTaskDate').value = task.lastReset;
+                document.getElementById('editTaskCycle').value = task.cycle || '';
                 document.getElementById('editTaskModal').classList.add('show');
             } catch (error) {
                 console.error('Error loading task:', error);
@@ -449,13 +517,21 @@
                 return;
             }
 
+            const cycleInput = document.getElementById('editTaskCycle');
+            const cycleValue = cycleInput.value.trim();
+            const cycle = cycleValue ? parseInt(cycleValue, 10) : null;
+            if (cycleValue && (!Number.isInteger(cycle) || cycle < 1)) {
+                alert('Cycle must be a whole number of days (>= 1)');
+                return;
+            }
+
             try {
                 const response = await fetch(`/api/tasks/${currentEditingTaskId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ lastReset: newDate })
+                    body: JSON.stringify({ lastReset: newDate, cycle: cycle })
                 });
 
                 if (response.ok) {
