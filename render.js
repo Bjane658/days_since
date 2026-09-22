@@ -32,16 +32,16 @@ function tileClass(task) {
 function cycleBadge(task) {
   if (!task.cycle) return '';
   const cycle = escapeHtml(task.cycle);
-  return `<span class="cycle-badge" title="Every ${cycle} days">${cycle}d</span>`;
+  return `<span class="badge badge-ghost" title="Every ${cycle} days">${cycle}d</span>`;
 }
 
 function dueLabel(task) {
   if (!task.cycle) return '';
   const due = task.cycle - task.daysSince;
-  if (due > 1) return `<div class="due-label">due in ${due} days</div>`;
-  if (due === 1) return '<div class="due-label">due tomorrow</div>';
-  if (due === 0) return '<div class="due-label due-today">due today</div>';
-  return `<div class="due-label due-today">${-due} day${due === -1 ? '' : 's'} overdue</div>`;
+  if (due > 1) return `<div class="due-label text-sm opacity-60">due in ${due} days</div>`;
+  if (due === 1) return '<div class="due-label text-sm opacity-60">due tomorrow</div>';
+  if (due === 0) return '<div class="due-label due-today text-sm font-bold text-error">due today</div>';
+  return `<div class="due-label due-today text-sm font-bold text-error">${-due} day${due === -1 ? '' : 's'} overdue</div>`;
 }
 
 function tileHtml(task) {
@@ -49,23 +49,25 @@ function tileHtml(task) {
   const name = escapeHtml(task.name ?? '');
   const days = task.daysSince;
   return [
-    `            <div class="task-tile ${tileClass(task)}" data-task-id="${id}">`,
-    `                <div class="task-name">${name} ${cycleBadge(task)} </div>`,
-    `                <div class="days-since">${days}</div>`,
-    `                <div class="days-label">day${days === 1 ? '' : 's'} ago</div>`,
-    `                ${dueLabel(task)}`,
-    '                <div class="task-actions">',
-    `                    <button class="btn btn-reset" onclick="resetTask('${id}', event)">Done Today!</button>`,
-    `                    <button class="btn btn-delete" onclick="deleteTask('${id}', event)">×</button>`,
-    '                </div>',
-    '            </div>',
+    `            <div class="task-tile card card-border bg-base-100 cursor-pointer shadow-sm transition-shadow duration-300 hover:shadow-md ${tileClass(task)}" data-task-id="${id}">`,
+    `                <div class="card-body gap-2">`,
+    `                    <div class="card-title text-lg"><span class="task-name">${name}</span> ${cycleBadge(task)}</div>`,
+    `                    <div class="days-since text-5xl font-bold">${days}</div>`,
+    `                    <div class="days-label opacity-60">day${days === 1 ? '' : 's'} ago</div>`,
+    `                    ${dueLabel(task)}`,
+    `                    <div class="card-actions mt-3">`,
+    `                        <button class="btn btn-success btn-soft flex-1" onclick="resetTask('${id}', event)">Done Today!</button>`,
+    `                        <button class="btn btn-error btn-soft px-3" onclick="deleteTask('${id}', event)" aria-label="Delete task">×</button>`,
+    `                    </div>`,
+    `                </div>`,
+    `            </div>`,
   ].join('\n');
 }
 
 const EMPTY_GRID = [
-  '            <div class="empty-state">',
-  '                <h2>No tasks yet!</h2>',
-  '                <p>Add your first task above to start tracking.</p>',
+  '            <div class="empty-state text-center opacity-60 col-span-full py-20">',
+  '                <h2 class="text-3xl font-bold text-base-content">No tasks yet!</h2>',
+  '                <p class="text-xl">Add your first task above to start tracking.</p>',
   '            </div>',
 ].join('\n');
 

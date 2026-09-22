@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Days Since - Task Tracker</title>
-    <link rel="stylesheet" href="/static/css/neo-tokens-slim.css">
+    <link rel="stylesheet" href="/static/css/app.css">
     <style>
         /* Px Grotesk - sipgate brand font (source: sipgate/web-apps) */
         @font-face {
@@ -36,413 +36,85 @@
             font-display: swap;
         }
 
-        :root {
-            --font-body: 'PX-Grotesk', 'BlinkMacSystemFont', '-apple-system', 'Trebuchet MS',
-                'Helvetica', 'HelveticaNeue', 'Helvetica Neue', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-            --font-mono: 'PX-Grotesk-Mono', 'Monaco', 'Lucida Console', 'monospace';
-        }
-
-
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-body);
-            background-color: var(--neo-color-global-background-primary-moderate-default, #f0f0f0);
-            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            font-size: 1.1em;
-            color: var(--neo-color-global-content-primary-moderate, #636363);
-        }
-
-        .add-task-section {
-            background: var(--neo-color-global-surface-section, #ffffff);
-            padding: 20px;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px var(--neo-color-global-shadow-default, rgba(18, 18, 18, 0.2));
-            margin-bottom: 30px;
-        }
-
-        .add-task-form {
-            display: flex;
-            gap: 10px;
-        }
-
-        .add-task-input {
-            flex: 1;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid var(--neo-color-global-border-neutral-soft-default, #e0e0e0);
-            border-radius: 0.25rem;
-            font-family: var(--font-body);
-            font-size: 1rem;
-            background: var(--neo-color-global-surface-section, #ffffff);
-            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
-            transition: border-color 150ms ease-in-out;
-        }
-
-        .add-task-input:focus {
-            outline: none;
-            border-color: var(--neo-color-global-border-neutral-moderate-default, #757575);
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem 1.25rem;
-            font-family: var(--font-body);
-            font-size: 1rem;
-            line-height: 1.5rem;
-            font-weight: 700;
-            border: none;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            user-select: none;
-            transition:
-                background-color 150ms ease-in-out,
-                color 150ms ease-in-out,
-                box-shadow 150ms ease-in-out,
-                border-color 150ms ease-in-out;
-        }
-
-        .btn:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 0.1875rem var(--neo-color-global-border-static-focus, #f547cd) inset;
-        }
-
-        /* Variant: loud = primary action on intense background */
-        .btn-primary {
-            background-color: var(--neo-color-global-background-primary-intense-default, #121212);
-            color: var(--neo-color-global-content-primary-on-intense, #fcfcfc);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--neo-color-global-background-primary-intense-hover, #2b2b2b);
-        }
-
-        .btn-primary:active {
-            background-color: var(--neo-color-global-background-primary-intense-active, #3c3c3c);
-        }
-
-        .tasks-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .task-tile {
-            background: var(--neo-color-global-surface-section, #ffffff);
-            padding: 24px;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px var(--neo-color-global-shadow-subtle, rgba(18, 18, 18, 0.04));
-            transition: all 0.3s;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .task-tile:hover {
-            box-shadow: 0 8px 12px var(--neo-color-global-shadow-default, rgba(18, 18, 18, 0.2));
-        }
-
-        .task-name {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
-            margin-bottom: 12px;
-        }
-
+        /* Tabular numbers: digit widths stay fixed */
         .days-since {
-            font-size: 3em;
-            font-weight: 700;
-            /* Tabular numbers: digit widths stay fixed (Neo typography guideline) */
             font-variant-numeric: lining-nums tabular-nums;
-            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
-            margin-bottom: 8px;
         }
 
-        .days-label {
-            font-size: 1em;
-            color: var(--neo-color-global-content-primary-moderate, #636363);
-            margin-bottom: 16px;
-        }
-
-        .cycle-badge {
-            display: inline-block;
-            font-size: 0.65em;
-            font-weight: 700;
-            font-variant-numeric: lining-nums tabular-nums;
-            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
-            background: var(--neo-color-global-background-primary-soft-default, #f0f0f0);
-            border-radius: 0.25rem;
-            padding: 2px 8px;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-
-        .due-label {
-            font-size: 0.95em;
-            color: var(--neo-color-global-content-primary-moderate, #636363);
-            margin-bottom: 16px;
-        }
-
-        .due-label.due-today {
-            font-weight: 700;
-            color: var(--neo-color-global-content-critical-moderate, #d3333a);
-        }
-
-        .task-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .cycle-input {
-            flex: 0 0 140px;
-        }
-
-        .form-hint {
-            font-size: 0.85em;
-            color: var(--neo-color-global-content-primary-moderate, #636363);
-            margin-top: 6px;
-        }
-
-        /* Variant: normal-critical = confirm-style destructive on soft bg */
-        .btn-reset {
-            flex: 1;
-            background-color: var(--neo-color-global-background-success-soft-default, #e1f8ec);
-            color: var(--neo-color-global-content-success-intense, #0b3e2a);
-        }
-
-        .btn-reset:hover {
-            background-color: var(--neo-color-global-background-success-soft-hover, #cef3e0);
-        }
-
-        .btn-reset:active {
-            background-color: var(--neo-color-global-background-success-soft-active, #b8ecd1);
-        }
-
-        .btn-delete {
-            background-color: var(--neo-color-global-background-critical-soft-default, #fdeceb);
-            color: var(--neo-color-global-content-critical-intense, #602121);
-            padding: 0.5rem 0.75rem;
-        }
-
-        .btn-delete:hover {
-            background-color: var(--neo-color-global-background-critical-soft-hover, #fbd9d7);
-        }
-
-        .btn-delete:active {
-            background-color: var(--neo-color-global-background-critical-soft-active, #f9c7c5);
-        }
-
-        .empty-state {
-            text-align: center;
-            color: var(--neo-color-global-content-primary-moderate, #636363);
-            padding: 60px 20px;
-        }
-
-        .empty-state h2 {
-            font-size: 2em;
-            margin-bottom: 10px;
-            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
-        }
-
-        .empty-state p {
-            font-size: 1.2em;
-        }
-
-        /* Color coding based on days */
+        /* Tile color coding based on days */
         .task-tile.fresh .days-since {
-            color: var(--neo-color-global-content-success-moderate, #008353);
+            color: var(--color-success-content, #008353);
         }
 
         .task-tile.warning .days-since {
-            color: var(--neo-color-global-content-warning-moderate, #986f00);
+            color: var(--color-warning-content, #986f00);
         }
 
         .task-tile.overdue .days-since {
-            color: var(--neo-color-global-content-critical-moderate, #d3333a);
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--neo-color-global-surface-overlay, rgba(7, 7, 7, 0.33));
-            backdrop-filter: blur(4px);
-        }
-
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: var(--neo-color-global-surface-dialog, #ffffff);
-            padding: 32px;
-            border-radius: 0.5rem;
-            box-shadow: 0 20px 25px -5px var(--neo-color-global-shadow-default, rgba(18, 18, 18, 0.2));
-            max-width: 500px;
-            width: 90%;
-            animation: modalSlideIn 0.3s ease-out;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-header {
-            font-size: 1.5em;
-            font-weight: 700;
-            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
-            margin-bottom: 24px;
-        }
-
-        .modal-body {
-            margin-bottom: 24px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: 400;
-            color: var(--neo-color-global-content-primary-moderate, #636363);
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid var(--neo-color-global-border-neutral-soft-default, #e0e0e0);
-            border-radius: 0.25rem;
-            font-family: var(--font-body);
-            font-size: 1rem;
-            background: var(--neo-color-global-surface-section, #ffffff);
-            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
-            transition: border-color 150ms ease-in-out;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--neo-color-global-border-neutral-moderate-default, #757575);
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-
-        .btn-secondary {
-            background-color: var(--neo-color-global-background-primary-soft-default, #f0f0f0);
-            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--neo-color-global-background-primary-soft-hover, #e8e8e8);
-        }
-
-        .btn-secondary:active {
-            background-color: var(--neo-color-global-background-primary-soft-active, #e1e1e1);
+            color: var(--color-error-content, #d3333a);
         }
     </style>
 </head>
-<body class="neo-light">
-    <div class="container">
-        <header>
-            <h1>Days Since</h1>
-            <p class="subtitle">Track your household tasks</p>
+<body class="min-h-screen bg-base-200">
+    <div class="container mx-auto max-w-5xl p-4 lg:p-6">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold">Days Since</h1>
+            <p class="text-base opacity-60">Track your household tasks</p>
         </header>
 
-        <div class="add-task-section">
-            <form class="add-task-form" onsubmit="addTask(event)">
+        <div class="mb-8 rounded-box bg-base-100 p-4 shadow-md lg:p-5">
+            <form class="flex flex-col gap-3 sm:flex-row" onsubmit="addTask(event)">
                 <input
                     type="text"
-                    class="add-task-input"
+                    class="input input-bordered flex-1"
                     id="taskNameInput"
                     placeholder="What do you want to track? (e.g., Vacuumed the floor, Cleaned the kitchen)"
                     required
                 >
                 <input
                     type="number"
-                    class="add-task-input cycle-input"
+                    class="input input-bordered w-full sm:w-40 shrink-0"
                     id="taskCycleInput"
                     placeholder="Every __ days"
                     min="1"
                     step="1"
                 >
-                <button type="submit" class="btn btn-primary">Add Task</button>
+                <button type="submit" class="btn btn-primary shrink-0">Add Task</button>
             </form>
+        </div>
 
-        <div id="tasksContainer" class="tasks-grid">
+        <div id="tasksContainer" class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
             <!-- TASKS -->
         </div>
     </div>
 
     <!-- Edit Task Modal -->
-    <div id="editTaskModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">Edit Task</div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label" for="editTaskName">Task Name</label>
-                    <input type="text" id="editTaskName" class="form-input" readonly>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="editTaskDate">Last Completed Date</label>
-                    <input type="date" id="editTaskDate" class="form-input">
-                <div class="form-group">
-                    <label class="form-label" for="editTaskCycle">Cycle (days)</label>
-                    <input type="number" id="editTaskCycle" class="form-input" placeholder="no cycle" min="1" step="1">
-                    <div class="form-hint">How often the task should be done. Leave empty for no cycle.</div>
+    <dialog id="editTaskModal" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box">
+            <h3 class="mb-6 text-2xl font-bold">Edit Task</h3>
+            <div class="mb-4">
+                <label class="label" for="editTaskName"><span class="label-text">Task Name</span></label>
+                <input type="text" id="editTaskName" class="input input-bordered w-full" readonly>
+            </div>
+            <div class="mb-4">
+                <label class="label" for="editTaskDate"><span class="label-text">Last Completed Date</span></label>
+                <input type="date" id="editTaskDate" class="input input-bordered w-full">
+            </div>
+            <div class="mb-4">
+                <label class="label" for="editTaskCycle"><span class="label-text">Cycle (days)</span></label>
+                <input type="number" id="editTaskCycle" class="input input-bordered w-full" placeholder="no cycle" min="1" step="1">
+                <div class="label">
+                    <span class="label-text-alt">How often the task should be done. Leave empty for no cycle.</span>
                 </div>
             </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+                </form>
                 <button class="btn btn-primary" onclick="saveTaskDate()">Save</button>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <script>
         async function addTask(event) {
@@ -529,6 +201,8 @@
 
         let currentEditingTaskId = null;
 
+        const editModal = () => document.getElementById('editTaskModal');
+
         async function openEditModal(taskId) {
             try {
                 const response = await fetch(`/api/tasks/${taskId}`);
@@ -543,7 +217,7 @@
                 document.getElementById('editTaskName').value = task.name;
                 document.getElementById('editTaskDate').value = task.lastReset;
                 document.getElementById('editTaskCycle').value = task.cycle || '';
-                document.getElementById('editTaskModal').classList.add('show');
+                editModal().showModal();
             } catch (error) {
                 console.error('Error loading task:', error);
                 alert('Failed to load task');
@@ -551,7 +225,7 @@
         }
 
         function closeEditModal() {
-            document.getElementById('editTaskModal').classList.remove('show');
+            editModal().close();
             currentEditingTaskId = null;
         }
 
@@ -601,15 +275,17 @@
                 tile.addEventListener('click', function(event) {
                     // Only trigger if clicking the tile itself, not buttons
                     if (event.target === tile || event.target.classList.contains('task-name') ||
-                        event.target.classList.contains('days-since') || event.target.classList.contains('days-label')) {
+                        event.target.classList.contains('days-since') ||
+                        event.target.classList.contains('days-label') ||
+                        event.target.classList.contains('due-label')) {
                         const taskId = tile.dataset.taskId;
                         openEditModal(taskId);
                     }
                 });
             });
 
-            // Close modal when clicking outside
-            document.getElementById('editTaskModal').addEventListener('click', function(event) {
+            // Close modal when clicking the backdrop
+            editModal().addEventListener('click', function(event) {
                 if (event.target === this) {
                     closeEditModal();
                 }

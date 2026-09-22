@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: light --default;
+}
+
+body {
+  font-family: "PX-Grotesk", "BlinkMacSystemFont", "-apple-system", "Trebuchet MS",
+    "Helvetica", "Segoe UI", "Roboto", "Arial", sans-serif;
+}
