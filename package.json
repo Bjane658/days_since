@@ -1,0 +1,11 @@
+{
+  "name": "days-since",
+  "version": "1.0.0",
+  "description": "Track days since household tasks were completed",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun app.js",
+    "dev": "bun --watch app.js"
+  }
+}

@@ -2,22 +2,12 @@
 .git
 .gitignore
 
-# Python cache
-__pycache__
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-*.egg
-*.egg-info
-dist
-build
+# Dependencies
+node_modules
 
-# Virtual environments
-venv
-env
-ENV
+# Lockfiles (app has zero dependencies)
+bun.lock
+bun.lockb
 
 # IDE files
 .vscode

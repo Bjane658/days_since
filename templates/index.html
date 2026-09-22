@@ -4,7 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Days Since - Task Tracker</title>
+    <link rel="stylesheet" href="/static/css/neo-tokens-slim.css">
     <style>
+        /* Px Grotesk - sipgate brand font (source: sipgate/web-apps) */
+        @font-face {
+            font-family: 'PX-Grotesk';
+            font-weight: 400;
+            font-style: normal;
+            src: url("/static/fonts/px-grotesk-regular.woff2") format('woff2');
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'PX-Grotesk';
+            font-weight: 400;
+            font-style: italic;
+            src: url("/static/fonts/px-grotesk-italic.woff2") format('woff2');
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'PX-Grotesk';
+            font-weight: 700;
+            font-style: normal;
+            src: url("/static/fonts/px-grotesk-bold.woff2") format('woff2');
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'PX-Grotesk';
+            font-weight: 700;
+            font-style: italic;
+            src: url("/static/fonts/px-grotesk-bold-italic.woff2") format('woff2');
+            font-display: swap;
+        }
+
+        :root {
+            --font-body: 'PX-Grotesk', 'BlinkMacSystemFont', '-apple-system', 'Trebuchet MS',
+                'Helvetica', 'HelveticaNeue', 'Helvetica Neue', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            --font-mono: 'PX-Grotesk-Mono', 'Monaco', 'Lucida Console', 'monospace';
+        }
+
+
+
         * {
             margin: 0;
             padding: 0;
@@ -12,8 +51,9 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-body);
+            background-color: var(--neo-color-global-background-primary-moderate-default, #f0f0f0);
+            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
             min-height: 100vh;
             padding: 20px;
         }
@@ -25,26 +65,26 @@
 
         header {
             text-align: center;
-            color: white;
+            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
             margin-bottom: 40px;
         }
 
         h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .subtitle {
             font-size: 1.1em;
-            opacity: 0.9;
+            color: var(--neo-color-global-content-primary-moderate, #636363);
         }
 
         .add-task-section {
-            background: white;
+            background: var(--neo-color-global-surface-section, #ffffff);
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px var(--neo-color-global-shadow-default, rgba(18, 18, 18, 0.2));
             margin-bottom: 30px;
         }
 
@@ -55,36 +95,58 @@
 
         .add-task-input {
             flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--neo-color-global-border-neutral-soft-default, #e0e0e0);
+            border-radius: 0.25rem;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            background: var(--neo-color-global-surface-section, #ffffff);
+            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
+            transition: border-color 150ms ease-in-out;
         }
 
         .add-task-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--neo-color-global-border-neutral-moderate-default, #757575);
         }
 
         .btn {
-            padding: 12px 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1.25rem;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            line-height: 1.5rem;
+            font-weight: 700;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 0.25rem;
             cursor: pointer;
-            transition: all 0.3s;
+            user-select: none;
+            transition:
+                background-color 150ms ease-in-out,
+                color 150ms ease-in-out,
+                box-shadow 150ms ease-in-out,
+                border-color 150ms ease-in-out;
         }
 
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 0.1875rem var(--neo-color-global-border-static-focus, #f547cd) inset;
+        }
+
+        /* Variant: loud = primary action on intense background */
         .btn-primary {
-            background: #667eea;
-            color: white;
+            background-color: var(--neo-color-global-background-primary-intense-default, #121212);
+            color: var(--neo-color-global-content-primary-on-intense, #fcfcfc);
         }
 
         .btn-primary:hover {
-            background: #5568d3;
-            transform: translateY(-1px);
+            background-color: var(--neo-color-global-background-primary-intense-hover, #2b2b2b);
+        }
+
+        .btn-primary:active {
+            background-color: var(--neo-color-global-background-primary-intense-active, #3c3c3c);
         }
 
         .tasks-grid {
@@ -94,47 +156,49 @@
         }
 
         .task-tile {
-            background: white;
+            background: var(--neo-color-global-surface-section, #ffffff);
             padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px var(--neo-color-global-shadow-subtle, rgba(18, 18, 18, 0.04));
             transition: all 0.3s;
             cursor: pointer;
             position: relative;
         }
 
         .task-tile:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 12px var(--neo-color-global-shadow-default, rgba(18, 18, 18, 0.2));
         }
 
         .task-name {
             font-size: 1.3em;
-            font-weight: 600;
-            color: #333;
+            font-weight: 700;
+            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
             margin-bottom: 12px;
         }
 
         .days-since {
             font-size: 3em;
             font-weight: 700;
-            color: #667eea;
+            /* Tabular numbers: digit widths stay fixed (Neo typography guideline) */
+            font-variant-numeric: lining-nums tabular-nums;
+            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
             margin-bottom: 8px;
         }
 
         .days-label {
             font-size: 1em;
-            color: #666;
+            color: var(--neo-color-global-content-primary-moderate, #636363);
             margin-bottom: 16px;
         }
 
         .cycle-badge {
             display: inline-block;
             font-size: 0.65em;
-            font-weight: 600;
-            color: #667eea;
-            background: #eef0fe;
-            border-radius: 10px;
+            font-weight: 700;
+            font-variant-numeric: lining-nums tabular-nums;
+            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
+            background: var(--neo-color-global-background-primary-soft-default, #f0f0f0);
+            border-radius: 0.25rem;
             padding: 2px 8px;
             margin-left: 8px;
             vertical-align: middle;
@@ -142,15 +206,14 @@
 
         .due-label {
             font-size: 0.95em;
-            color: #555;
+            color: var(--neo-color-global-content-primary-moderate, #636363);
             margin-bottom: 16px;
         }
 
         .due-label.due-today {
-            font-weight: 600;
-            color: #ef4444;
+            font-weight: 700;
+            color: var(--neo-color-global-content-critical-moderate, #d3333a);
         }
-
 
         .task-actions {
             display: flex;
@@ -163,57 +226,66 @@
 
         .form-hint {
             font-size: 0.85em;
-            color: #888;
+            color: var(--neo-color-global-content-primary-moderate, #636363);
             margin-top: 6px;
         }
 
+        /* Variant: normal-critical = confirm-style destructive on soft bg */
         .btn-reset {
             flex: 1;
-            background: #10b981;
-            color: white;
+            background-color: var(--neo-color-global-background-success-soft-default, #e1f8ec);
+            color: var(--neo-color-global-content-success-intense, #0b3e2a);
         }
 
         .btn-reset:hover {
-            background: #059669;
+            background-color: var(--neo-color-global-background-success-soft-hover, #cef3e0);
+        }
+
+        .btn-reset:active {
+            background-color: var(--neo-color-global-background-success-soft-active, #b8ecd1);
         }
 
         .btn-delete {
-            background: #ef4444;
-            color: white;
-            padding: 12px 16px;
+            background-color: var(--neo-color-global-background-critical-soft-default, #fdeceb);
+            color: var(--neo-color-global-content-critical-intense, #602121);
+            padding: 0.5rem 0.75rem;
         }
 
         .btn-delete:hover {
-            background: #dc2626;
+            background-color: var(--neo-color-global-background-critical-soft-hover, #fbd9d7);
+        }
+
+        .btn-delete:active {
+            background-color: var(--neo-color-global-background-critical-soft-active, #f9c7c5);
         }
 
         .empty-state {
             text-align: center;
-            color: white;
+            color: var(--neo-color-global-content-primary-moderate, #636363);
             padding: 60px 20px;
         }
 
         .empty-state h2 {
             font-size: 2em;
             margin-bottom: 10px;
+            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
         }
 
         .empty-state p {
             font-size: 1.2em;
-            opacity: 0.9;
         }
 
         /* Color coding based on days */
         .task-tile.fresh .days-since {
-            color: #10b981;
+            color: var(--neo-color-global-content-success-moderate, #008353);
         }
 
         .task-tile.warning .days-since {
-            color: #f59e0b;
+            color: var(--neo-color-global-content-warning-moderate, #986f00);
         }
 
         .task-tile.overdue .days-since {
-            color: #ef4444;
+            color: var(--neo-color-global-content-critical-moderate, #d3333a);
         }
 
         /* Modal styles */
@@ -225,7 +297,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: var(--neo-color-global-surface-overlay, rgba(7, 7, 7, 0.33));
             backdrop-filter: blur(4px);
         }
 
@@ -236,10 +308,10 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--neo-color-global-surface-dialog, #ffffff);
             padding: 32px;
-            border-radius: 16px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 25px -5px var(--neo-color-global-shadow-default, rgba(18, 18, 18, 0.2));
             max-width: 500px;
             width: 90%;
             animation: modalSlideIn 0.3s ease-out;
@@ -258,8 +330,8 @@
 
         .modal-header {
             font-size: 1.5em;
-            font-weight: 600;
-            color: #333;
+            font-weight: 700;
+            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
             margin-bottom: 24px;
         }
 
@@ -273,23 +345,26 @@
 
         .form-label {
             display: block;
-            font-weight: 500;
-            color: #555;
+            font-weight: 400;
+            color: var(--neo-color-global-content-primary-moderate, #636363);
             margin-bottom: 8px;
         }
 
         .form-input {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--neo-color-global-border-neutral-soft-default, #e0e0e0);
+            border-radius: 0.25rem;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            background: var(--neo-color-global-surface-section, #ffffff);
+            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
+            transition: border-color 150ms ease-in-out;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--neo-color-global-border-neutral-moderate-default, #757575);
         }
 
         .modal-actions {
@@ -299,16 +374,20 @@
         }
 
         .btn-secondary {
-            background: #e5e7eb;
-            color: #374151;
+            background-color: var(--neo-color-global-background-primary-soft-default, #f0f0f0);
+            color: var(--neo-color-global-content-primary-intense, #1f1f1f);
         }
 
         .btn-secondary:hover {
-            background: #d1d5db;
+            background-color: var(--neo-color-global-background-primary-soft-hover, #e8e8e8);
+        }
+
+        .btn-secondary:active {
+            background-color: var(--neo-color-global-background-primary-soft-active, #e1e1e1);
         }
     </style>
 </head>
-<body>
+<body class="neo-light">
     <div class="container">
         <header>
             <h1>Days Since</h1>
@@ -336,39 +415,7 @@
             </form>
 
         <div id="tasksContainer" class="tasks-grid">
-            {% if tasks %}
-                {% for task in tasks %}
-                <div class="task-tile {% if task.cycle and task.daysSince < task.cycle %}fresh{% elif task.cycle and task.daysSince <= task.cycle + 1 %}warning{% elif task.cycle %}overdue{% elif task.daysSince <= 2 %}fresh{% elif task.daysSince <= 7 %}warning{% else %}overdue{% endif %}"
-                     data-task-id="{{ task.id }}">
-                    <div class="task-name">{{ task.name }}
-                        {% if task.cycle %}<span class="cycle-badge" title="Every {{ task.cycle }} days">{{ task.cycle }}d</span>{% endif %}
-                    </div>
-                    <div class="days-since">{{ task.daysSince }}</div>
-                    <div class="days-label">day{% if task.daysSince != 1 %}s{% endif %} ago</div>
-                    {% if task.cycle %}
-                        {% set due = task.cycle - task.daysSince %}
-                        {% if due > 1 %}
-                            <div class="due-label">due in {{ due }} days</div>
-                        {% elif due == 1 %}
-                            <div class="due-label">due tomorrow</div>
-                        {% elif due == 0 %}
-                            <div class="due-label due-today">due today</div>
-                        {% else %}
-                            <div class="due-label due-today">{{ -due }} day{% if due != -1 %}s{% endif %} overdue</div>
-                        {% endif %}
-                    {% endif %}
-                    <div class="task-actions">
-                        <button class="btn btn-reset" onclick="resetTask('{{ task.id }}', event)">Done Today!</button>
-                        <button class="btn btn-delete" onclick="deleteTask('{{ task.id }}', event)">×</button>
-                    </div>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="empty-state">
-                    <h2>No tasks yet!</h2>
-                    <p>Add your first task above to start tracking.</p>
-                </div>
-            {% endif %}
+            <!-- TASKS -->
         </div>
     </div>
 

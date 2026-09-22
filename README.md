@@ -17,17 +17,19 @@ A simple web application to track how many days have passed since you last compl
 
 ## Setup
 
-1. Install dependencies:
+Requires [Bun](https://bun.sh) (>= 1.1). The app has no dependencies.
+
+1. Run the application:
 ```bash
-pip install -r requirements.txt
+bun app.js
 ```
 
-2. Run the application:
+For development with automatic reload:
 ```bash
-python app.py
+bun --watch app.js
 ```
 
-3. Open your browser and navigate to:
+2. Open your browser and navigate to:
 ```
 http://127.0.0.1:5000
 ```
@@ -75,7 +77,7 @@ Each task is stored as a JSON file in the `data/` directory with the following s
 ## Command Line Options
 
 ```bash
-python app.py --help
+bun app.js --help
 ```
 
 Options:
@@ -85,7 +87,7 @@ Options:
 
 Example:
 ```bash
-python app.py --port 8000 --dir ~/my_tasks
+bun app.js --port 8000 --dir ~/my_tasks
 ```
 
 ## Future Enhancements
